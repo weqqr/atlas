@@ -1,15 +1,34 @@
-use crate::raster::{Image, Rgba};
+use std::error::Error;
 
+use tracing::{debug, info, level_filters::LevelFilter};
+use tracing_subscriber::EnvFilter;
+
+use crate::{
+    raster::{Image, Rgba},
+    render::render_node,
+};
+
+pub mod asset;
 pub mod raster;
+pub mod render;
 
-fn main() {
-    let mut image = Image::new(512, 512);
+fn main() -> Result<(), Box<dyn Error>> {
+    let filter = EnvFilter::builder()
+        .with_default_directive(LevelFilter::INFO.into())
+        .from_env()?
+        .add_directive("atlas=debug".parse()?);
 
-    for y in 0..512 {
-        for x in 0..512 {
-            image.set_pixel(x, y, Rgba::new((x ^ y) as u8, 0, 255, 255));
-        }
-    }
+    tracing_subscriber::fmt().with_env_filter(filter).init();
 
-    image.save_png("test.png");
+    info!("rendering image");
+
+    let mut image = render_node();
+
+    let path = "test.png";
+
+    image.save_png(path);
+
+    debug!(message = "image saved!", ?path);
+
+    Ok(())
 }

@@ -28,6 +28,10 @@ impl Image {
     }
 
     pub fn set_pixel(&mut self, x: usize, y: usize, color: Rgba) {
+        if x >= self.width || y >= self.height {
+            return;
+        }
+
         let index = self.pixel_index(x, y);
 
         self.data[index + 0] = color.r;
@@ -38,6 +42,14 @@ impl Image {
 
     fn pixel_index(&self, x: usize, y: usize) -> usize {
         (y * self.width + x) * Self::BYTES_PER_PIXEL
+    }
+
+    pub fn width(&self) -> usize {
+        self.width
+    }
+
+    pub fn height(&self) -> usize {
+        self.height
     }
 
     pub fn save_png(&self, path: impl AsRef<Path>) {
